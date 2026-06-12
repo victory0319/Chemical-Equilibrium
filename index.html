@@ -1,328 +1,359 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>화학평형 파싱 시뮬레이터 v2.0</title>
-    <style>
-        body {
-            background-color: #d4d0c8;
-            color: #000000;
-            font-family: 'Malgun Gothic', 'Dotum', sans-serif;
-            font-size: 13px;
-            margin: 10px;
-        }
-        h1 {
-            font-size: 19px;
-            text-align: center;
-            background-color: #000080;
-            color: white;
-            padding: 6px;
-            margin: 0 0 10px 0;
-            border: 2px inset #ffffff;
-        }
-        .main-layout { display: flex; gap: 10px; }
-        .window-box {
-            background-color: #d4d0c8;
-            border: 2px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-        .window-title {
-            background: linear-gradient(90deg, #0055e5, #9ec2ff);
-            color: white;
-            font-weight: bold;
-            padding: 3px 6px;
-            margin-bottom: 10px;
-        }
-        .left-panel { width: 360px; display: flex; flex-direction: column; gap: 10px; }
-        .right-panel { flex: 1; min-width: 500px; }
-        .input-group { margin-bottom: 8px; border-bottom: 1px dashed #808080; padding-bottom: 8px; }
-        label { display: inline-block; width: 90px; font-weight: bold; }
-        input[type="text"], input[type="number"] {
-            border: 2px inset #ffffff; background: white; padding: 2px;
-        }
-        .formula-input { width: 230px; font-family: monospace; font-weight: bold; }
-        button {
-            background-color: #d4d0c8; border: 2px solid;
-            border-color: #ffffff #808080 #808080 #ffffff;
-            font-size: 12px; padding: 5px 8px; cursor: pointer; font-weight: bold;
-        }
-        button:active { border-color: #808080 #ffffff #ffffff #808080; }
-        .btn-block { width: 100%; margin-top: 4px; text-align: left; }
-        .status-screen {
-            background-color: #000000; color: #00ff00;
-            font-family: Courier, monospace; padding: 8px;
-            border: 2px inset #ffffff; margin-top: 5px; font-size: 12px; line-height: 1.4;
-        }
-        canvas { background-color: #ffffff; border: 2px inset #ffffff; display: block; width: 100%; }
-        .help-box { font-size: 11px; color: #404040; margin-top: 4px; line-height: 1.3; }
-    </style>
+  <meta charset="utf-8" />
+  <title>화학 평형 및 르샤틀리에 원리 실험실</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #fafafa;
+      color: #171717;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .wrapper {
+      max-width: 850px;
+      width: 100%;
+      background: #ffffff;
+      padding: 25px;
+      border: 1px solid #e5e5e5;
+      border-radius: 4px;
+    }
+    h1 { font-size: 1.25rem; font-weight: 700; margin: 0 0 5px 0; }
+    p { font-size: 0.85rem; color: #737373; margin: 0 0 20px 0; }
+    
+    .graph-section { width: 100%; margin-bottom: 20px; }
+    canvas { width: 100%; background: #ffffff; border: 1px solid #e5e5e5; border-radius: 4px; display: block; }
+    
+    .legend { display: flex; gap: 20px; justify-content: center; margin-top: 10px; font-size: 0.85rem; font-weight: 500; }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .dot { width: 12px; height: 3px; display: inline-block; }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 20px;
+      border-top: 1px solid #f5f5f5;
+      padding-top: 20px;
+    }
+
+    .control-block { display: flex; flex-direction: column; gap: 15px; }
+    .section-label { font-size: 0.85rem; font-weight: 700; color: #171717; margin-bottom: 6px; }
+    
+    /* 초기 농도 설정 스타일 */
+    .init-input-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      background: #fafafa;
+      padding: 10px;
+      border: 1px solid #e5e5e5;
+      border-radius: 4px;
+      margin-top: 6px;
+    }
+    .init-input-item { display: flex; flex-direction: column; gap: 4px; font-size: 0.8rem; font-weight: 600; }
+    .init-input-item input { padding: 6px; border: 1px solid #d4d4d4; border-radius: 4px; text-align: center; font-weight: 700; }
+    .reset-btn { width: 100%; margin-top: 8px; padding: 8px; background: #171717; color: #fff; border: none; border-radius: 4px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .reset-btn:hover { background: #404040; }
+
+    .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 6px; }
+    .dynamic-btn-zone { display: flex; flex-direction: column; gap: 10px; }
+    
+    button {
+      padding: 8px; background: #ffffff; color: #171717; border: 1px solid #d4d4d4;
+      border-radius: 4px; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.1s;
+    }
+    button:hover { background: #f5f5f5; border-color: #a3a3a3; }
+    button:active { background: #e5e5e5; }
+    
+    select { width: 100%; padding: 8px; border: 1px solid #d4d4d4; border-radius: 4px; font-size: 0.85rem; background: #fff; }
+
+    .monitor-block { background: #fafafa; border: 1px solid #e5e5e5; border-radius: 4px; padding: 15px; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    .data-table th, .data-table td { padding: 8px 2px; border-bottom: 1px solid #e5e5e5; text-align: left; }
+    .data-table tr:last-child th, .data-table tr:last-child td { border-bottom: none; }
+    .data-table th { color: #737373; font-weight: 500; }
+    .data-table td { font-weight: 600; text-align: right; }
+  </style>
 </head>
 <body>
 
-    <h1>자유 반응식 입력 기반 화학 평형 실시간 시뮬레이션 시스템</h1>
+<div class="wrapper">
+  <h1>화학 평형 및 르샤틀리에 원리 실험실</h1>
+  <p>초기 농도를 직접 설정하고 다양한 조건 변화 버튼을 눌러 평형 이동을 확인해보세요.</p>
 
-    <div class="main-layout">
-        <div class="left-panel">
-            <div class="window-box">
-                <div class="window-title">1. 임의 화학 반응식 입력</div>
-                <div class="input-group">
-                    <label>반응식 입력:</label>
-                    <input type="text" id="raw-formula" class="formula-input" value="N2O4 <=> 2NO2">
-                    <div class="help-box">
-                        * 입력 예시: <br>
-                        - <code>N2O4 <=> 2NO2</code> (기본 발열반응)<br>
-                        - <code>A + B <=> 2C</code> (계수 1, 1, 2 자동파싱)<br>
-                        - <code>2H2 + O2 <=> 2H2O</code> (다양한 계수 대응)
-                    </div>
-                </div>
-                <div class="input-group">
-                    <label>평형상수(K):</label>
-                    <input type="number" id="input-k" value="0.50" step="0.05" style="width:60px;">
-                </div>
-                <button onclick="parseAndReset()" style="width: 100%; background-color: #b5b0a8;">반응식 파싱 및 시스템 초기화</button>
-            </div>
+  <div class="graph-section">
+    <canvas id="chartCanvas" width="800" height="340"></canvas>
+    <div id="chart-legend" class="legend"></div>
+  </div>
 
-            <div class="window-box">
-                <div class="window-title">2. 르샤틀리에 조작 패널</div>
-                <div style="margin-bottom: 10px;">
-                    <strong>[농도 변화 - 물질 강제 주입]</strong><br>
-                    <button class="btn-block" onclick="injectSubstance('R1')">▶ 첫 번째 반응물 급격히 주입 (+0.6M)</button>
-                    <button class="btn-block" onclick="injectSubstance('P1')">▶ 첫 번째 생성물 급격히 주입 (+0.6M)</button>
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <strong>[압력 변화 - 부피 통제]</strong><br>
-                    <button class="btn-block" onclick="changeVolume(0.5)">▶ 부피 반감 (V → 0.5L) [계의 압력↑]</button>
-                    <button class="btn-block" onclick="changeVolume(2.0)">▶ 부피 2배 (V → 2.0L) [계의 압력↓]</button>
-                </div>
-                <div>
-                    <strong>[온도 변화 - 환경 제어]</strong><br>
-                    <button class="btn-block" onclick="changeTemp('up')">▶ 계 가열 (발열 반응 가정: K 감소)</button>
-                    <button class="btn-block" onclick="changeTemp('down')">▶ 계 냉각 (발열 반응 가정: K 증가)</button>
-                </div>
-            </div>
+  <div class="dashboard-grid">
+    
+    <div class="control-block">
+      <div>
+        <div class="section-label">실험할 가역 반응식 선택</div>
+        <select id="reaction-picker" onchange="loadSelectedPreset()">
+          <option value="no2_n2o4">2NO₂ (적갈색) ⇄ N₂O₄ (무색)</option>
+          <option value="haber">N₂ + 3H₂ ⇄ 2NH₃</option>
+          <option value="hi">H₂ + I₂ ⇄ 2HI</option>
+        </select>
+        
+        <div id="init-concentration-zone" class="init-input-box">
+          </div>
+        <button class="reset-btn" onclick="applyInitialConcentrations()">설정한 농도로 실험 리셋</button>
+      </div>
 
-            <div class="window-box">
-                <div class="window-title">3. 수식 엔진 및 상태 모니터</div>
-                <div class="status-screen" id="monitor">SYSTEM INITIALIZING...</div>
-            </div>
+      <div>
+        <div class="section-label" style="margin-top: 5px;">르샤틀리에 조건 변화 버튼</div>
+        
+        <span style="font-size:0.75rem; color:#737373; font-weight:600; display:block; margin:4px 0;">[실시간 물질 추가/제거]</span>
+        <div id="substance-buttons" class="dynamic-btn-zone">
+          </div>
+
+        <span style="font-size:0.75rem; color:#737373; font-weight:600; display:block; margin:12px 0 4px 0;">[부피 및 압력 조절]</span>
+        <div class="btn-group">
+          <button onclick="changeEnvironment('inc_P')">압력 증가 (부피 줄임)</button>
+          <button onclick="changeEnvironment('dec_P')">압력 감소 (부피 늘림)</button>
         </div>
 
-        <div class="right-panel window-box">
-            <div class="window-title">📊 농도-시간 변화 그래프 및 추출된 평형 수식</div>
-            <div id="formula-display" style="font-size:14px; font-weight:bold; margin-bottom:8px; color:#000080;"></div>
-            <canvas id="graphCanvas" width="750" height="410"></canvas>
-            <div style="margin-top:8px; font-weight:bold; font-size:12px;">
-                범례: 
-                <span style="color:blue;">■ 반응물군(Reactants)</span> &nbsp;&nbsp; 
-                <span style="color:red;">■ 생성물군(Products)</span> &nbsp;&nbsp; 
-                <span style="color:orange;">--- 평형상수(K) 기준선</span>
-            </div>
+        <span style="font-size:0.75rem; color:#737373; font-weight:600; display:block; margin:4px 0;">[온도 조절]</span>
+        <div class="btn-group">
+          <button onclick="changeEnvironment('inc_T')">온도 높이기 (가열)</button>
+          <button onclick="changeEnvironment('dec_T')">온도 낮추기 (냉각)</button>
         </div>
+      </div>
     </div>
 
-    <script>
-        const canvas = document.getElementById('graphCanvas');
-        const ctx = canvas.getContext('2d');
+    <div class="monitor-block">
+      <div class="section-label" style="margin-bottom:10px;">실시간 실험실 데이터</div>
+      <table class="data-table">
+        <tr>
+          <th>현재 온도의 실제 평형 상수 (Kc)</th>
+          <td id="data-kc">-</td>
+        </tr>
+        <tr>
+          <th>현재 농도로 계산한 반응 지수 (Q)</th>
+          <td id="data-q">-</td>
+        </tr>
+        <tr>
+          <th>현재 실험 온도</th>
+          <td id="data-temp">25 °C</td>
+        </tr>
+        <tr>
+          <th>현재 용기 부피</th>
+          <td id="data-vol">1.0 L</td>
+        </tr>
+        <tr>
+          <th>반응의 이동 방향 판정</th>
+          <td id="data-status" style="font-weight:700;">-</td>
+        </tr>
+      </table>
+    </div>
 
-        // 엔진 내부 상태 데이터
-        let sys = {
-            reactants: [], // { name: 'A', coeff: 1, moles: 1.0, conc: 1.0 }
-            products: [],  // { name: 'C', coeff: 2, moles: 0.7, conc: 0.7 }
-            V: 1.0, K: 0.5, Q: 0.5,
-            history: [], time: 0,
-            expressionK: ""
-        };
+  </div>
+</div>
 
-        const k_f = 0.05; // 반응속도 상수 기본값
+<script>
+  const presets = {
+    no2_n2o4: {
+      title: "2NO₂ ⇄ N₂O₄ 평형 실험",
+      components: [
+        { name: "NO₂", type: "reactant", coeff: 2, init: 2.0, color: "#dc2626" },
+        { name: "N₂O₄", type: "product", coeff: 1, init: 0.0, color: "#2563eb" }
+      ],
+      getK: (t) => 170.0 * Math.exp(-0.06 * (t - 25))
+    },
+    haber: {
+      title: "N₂ + 3H₂ ⇄ 2NH₃ 평형 실험",
+      components: [
+        { name: "N₂", type: "reactant", coeff: 1, init: 1.0, color: "#d97706" },
+        { name: "H₂", type: "reactant", coeff: 3, init: 3.0, color: "#059669" },
+        { name: "NH₃", type: "product", coeff: 2, init: 0.0, color: "#7c3aed" }
+      ],
+      getK: (t) => 50.0 * Math.exp(-0.04 * (t - 25))
+    },
+    hi: {
+      title: "H₂ + I₂ ⇄ 2HI 평형 실험",
+      components: [
+        { name: "H₂", type: "reactant", coeff: 1, init: 1.5, color: "#0891b2" },
+        { name: "I₂", type: "reactant", coeff: 1, init: 1.5, color: "#db2777" },
+        { name: "HI", type: "product", coeff: 2, init: 0.0, color: "#ea580c" }
+      ],
+      getK: (t) => 50.0 * Math.exp(-0.01 * (t - 25))
+    }
+  };
 
-        // 핵심 기능: 사용자가 입력한 문자열을 분해하여 계수와 물질명을 추출하는 파서(Parser)
-        function parseFormula(text) {
-            // 공백 제거 후 '=>' 또는 '<=>' 또는 '->' 기준으로 반응물/생성물 분리
-            let sides = text.replace(/\s+/g, '').split(/<=>|->|=/);
-            if(sides.length !== 2) return false;
+  let coreSim = { isRunning: false, current: null, V: 1.0, T: 25, species: [], history: [] };
 
-            function parseSide(sideText) {
-                let parts = sideText.split('+');
-                return parts.map(p => {
-                    // 숫자(계수)와 문자(물질명) 분리 매칭
-                    let match = p.match(/^(\d*)([A-Za-z0-9]+)$/);
-                    if(match) {
-                        return {
-                            name: match[2],
-                            coeff: match[1] === "" ? 1 : parseInt(match[1]),
-                            moles: 1.0, // 초기 몰수 기본 배치
-                            conc: 1.0
-                        };
-                    }
-                    return null;
-                }).filter(x => x !== null);
-            }
+  function loadSelectedPreset() {
+    const code = document.getElementById('reaction-picker').value;
+    const preset = presets[code];
+    coreSim.current = preset;
 
-            sys.reactants = parseSide(sides[0]);
-            sys.products = parseSide(sides[1]);
-            return sys.reactants.length > 0 && sys.products.length > 0;
-        }
+    // 1. 초기 농도 기입 패널 동적 생성
+    const inputZone = document.getElementById('init-concentration-zone');
+    inputZone.innerHTML = '';
+    preset.components.forEach((c, idx) => {
+      inputZone.innerHTML += `
+        <div class="init-input-item">
+          <span style="color:${c.color}">[${c.name}] 초기 농도(M)</span>
+          <input type="number" id="user-init-${idx}" value="${c.init}" min="0" max="5" step="0.5">
+        </div>
+      `;
+    });
 
-        // 추출된 구조를 기반으로 평형 상수 공식 식(String) 빌드
-        function buildKExpression() {
-            let top = sys.products.map(p => `[${p.name}]<sup>${p.coeff > 1 ? p.coeff : ''}</sup>`).join('');
-            let bottom = sys.reactants.map(r => `[${r.name}]<sup>${r.coeff > 1 ? r.coeff : ''}</sup>`).join('');
-            sys.expressionK = `K = ${top} / ${bottom}`;
-            document.getElementById('formula-display').innerHTML = `추출된 평형식: &nbsp;&nbsp; ${sys.expressionK}`;
-        }
+    // 2. 실시간 조절 버튼 동적 생성
+    const btnZone = document.getElementById('substance-buttons');
+    btnZone.innerHTML = '';
+    preset.components.forEach((s, idx) => {
+      btnZone.innerHTML += `
+        <div class="btn-group">
+          <button onclick="adjustMole(${idx}, 1.0)" style="border-left: 3px solid ${s.color}; font-weight:600;">${s.name} 추가 (+1M)</button>
+          <button onclick="adjustMole(${idx}, -1.0)">${s.name} 제거 (-1M)</button>
+        </div>
+      `;
+    });
 
-        function parseAndReset() {
-            let formulaText = document.getElementById('raw-formula').value;
-            let success = parseFormula(formulaText);
-            if(!success) {
-                alert("반응식 형식이 올바르지 않습니다. (예: 2A + B <=> 2C)");
-                return;
-            }
+    // 3. 그래프 범례 업데이트
+    const leg = document.getElementById('chart-legend');
+    leg.innerHTML = '';
+    preset.components.forEach(s => {
+      leg.innerHTML += `<div class="legend-item"><span class="dot" style="background:${s.color}"></span> [${s.name}]</div>`;
+    });
 
-            sys.K = parseFloat(document.getElementById('input-k').value) || 0.5;
-            sys.V = 1.0;
-            sys.time = 0;
-            sys.history = [];
+    applyInitialConcentrations();
+  }
 
-            // 정량적 초기화 평형 상태 강제 매칭 연산 (야매 보정)
-            sys.reactants.forEach(r => r.moles = 1.2);
-            let denom = sys.reactants.reduce((acc, r) => acc * Math.pow(1.2, r.coeff), 1);
-            let targetTop = sys.K * denom;
-            
-            // 생성물 몰수 역산 분배
-            let totalCoeffP = sys.products.reduce((acc, p) => acc + p.coeff, 0);
-            sys.products.forEach(p => {
-                p.moles = Math.pow(targetTop, 1 / totalCoeffP) * (p.coeff / totalCoeffP * 1.5);
-            });
+  // 사용자가 입력한 초기 농도를 읽어서 시뮬레이션을 완전히 초기화하는 함수
+  function applyInitialConcentrations() {
+    if (!coreSim.current) return;
 
-            buildKExpression();
+    coreSim.V = 1.0;
+    coreSim.T = 25;
+    coreSim.history = [];
 
-            // 초기 수평선 구축용 안정한 평형 루프 선조립
-            for(let i=0; i<50; i++) {
-                runKineticsEngine();
-            }
-        }
+    coreSim.species = coreSim.current.components.map((c, idx) => {
+      const inputVal = parseFloat(document.getElementById(`user-init-${idx}`).value);
+      const checkedVal = isNaN(inputVal) || inputVal < 0 ? 0 : inputVal;
+      return {
+        name: c.name, type: c.type, coeff: c.coeff, color: c.color,
+        moles: checkedVal * coreSim.V, conc: checkedVal
+      };
+    });
 
-        // 르샤틀리에 작동 처리 함수
-        function injectSubstance(type) {
-            if(type === 'R1' && sys.reactants[0]) sys.reactants[0].moles += 0.6;
-            if(type === 'P1' && sys.products[0]) sys.products[0].moles += 0.6;
-        }
-        function changeVolume(val) { sys.V = val; }
-        function changeTemp(dir) {
-            if(dir === 'up') sys.K = parseFloat((sys.K * 0.4).toFixed(3));
-            else sys.K = parseFloat((sys.K * 2.5).toFixed(3));
-        }
+    coreSim.isRunning = true;
+  }
 
-        // 핵심 화학 엔진: 화학 양론에 맞춘 Q 계산 및 몰수 변동 동역학 연산
-        function runKineticsEngine() {
-            // 1. 각 성분의 실시간 몰농도 계산
-            sys.reactants.forEach(r => r.conc = r.moles / sys.V);
-            sys.products.forEach(p => p.conc = p.moles / sys.V);
+  function adjustMole(index, amount) {
+    if(!coreSim.isRunning) return;
+    coreSim.species[index].moles += amount * coreSim.V;
+    if(coreSim.species[index].moles < 0) coreSim.species[index].moles = 0;
+  }
 
-            // 2. 파싱된 수식 규칙대로 Q 연산
-            let bottomQ = sys.reactants.reduce((acc, r) => acc * Math.pow(r.conc, r.coeff), 1);
-            let topQ = sys.products.reduce((acc, p) => acc * Math.pow(p.conc, p.coeff), 1);
-            if(bottomQ === 0) bottomQ = 0.00001;
-            sys.Q = topQ / bottomQ;
+  function changeEnvironment(action) {
+    if(!coreSim.isRunning) return;
+    if(action === 'inc_P') { coreSim.V = 0.5; }
+    if(action === 'dec_P') { coreSim.V = 2.0; }
+    if(action === 'inc_T') { coreSim.T = 65; }
+    if(action === 'dec_T') { coreSim.T = 10; }
+  }
 
-            // 3. 정/역반응 속도 연산
-            let r_forward = k_f * sys.reactants.reduce((acc, r) => acc * Math.pow(r.conc, r.coeff), 1);
-            let k_b = k_f / sys.K;
-            let r_backward = k_b * sys.products.reduce((acc, p) => acc * Math.pow(p.conc, p.coeff), 1);
+  function calculationLoop() {
+    if(!coreSim.isRunning) return;
 
-            let net_rate = (r_forward - r_backward) * 0.1; // dt = 0.1 역할 크기 한계 제어
-            if(net_rate > 0.08) net_rate = 0.08;
-            if(net_rate < -0.08) net_rate = -0.08;
+    coreSim.species.forEach(s => s.conc = s.moles / coreSim.V);
 
-            // 4. 화학 양론 계수비에 의거한 실제 몰수 가감 연산
-            sys.reactants.forEach(r => { r.moles -= r.coeff * net_rate * sys.V; if(r.moles < 0) r.moles = 0; });
-            sys.products.forEach(p => { p.moles += p.coeff * net_rate * sys.V; if(p.moles < 0) p.moles = 0; });
+    let targetKc = coreSim.current.getK(coreSim.T);
+    let rPart = 1.0, pPart = 1.0;
 
-            sys.time++;
+    coreSim.species.forEach(s => {
+      if(s.type === 'reactant') rPart *= Math.pow(s.conc, s.coeff);
+      if(s.type === 'product') pPart *= Math.pow(s.conc, s.coeff);
+    });
 
-            // 히스토리 깊이 버퍼 저장
-            sys.history.push({
-                reactants: sys.reactants.map(r => r.conc),
-                products: sys.products.map(p => p.conc),
-                K: sys.K, Q: sys.Q
-            });
-            if(sys.history.length > 150) sys.history.shift();
-        }
+    let currentQ = rPart === 0 ? 9999 : pPart / rPart;
 
-        function drawInterface() {
-            // 텍스트 모니터 UI 업데이트
-            let stateStr = "EQUILIBRIUM (평형)";
-            if (sys.Q < sys.K - 0.04) stateStr = "FORWARD SHIFT (정반응)";
-            if (sys.Q > sys.K + 0.04) stateStr = "REVERSE SHIFT (역반응)";
+    let k = 0.08;
+    let v_f = k * rPart;
+    let v_b = (k / targetKc) * pPart;
+    let net = (v_f - v_b) * 0.06;
 
-            let rConcStr = sys.reactants.map(r => `▶ [${r.name}]: ${r.conc.toFixed(3)}M<br>`).join('');
-            let pConcStr = sys.products.map(p => `▶ [${p.name}]: ${p.conc.toFixed(3)}M<br>`).join('');
+    if(net > 0.05) net = 0.05;
+    if(net < -0.05) net = -0.05;
 
-            document.getElementById('monitor').innerHTML = 
-                `[QUANTITATIVE ENGINE v2.0]<br>` +
-                `----------------------------<br>` +
-                `■ Constant K : ${sys.K.toFixed(3)}<br>` +
-                `■ Quotient Q : ${sys.Q.toFixed(3)}<br>` +
-                `■ Shift Dir : ${stateStr}<br>` +
-                `----------------------------<br>` +
-                `[현재 성분별 몰농도]<br>` + rConcStr + pConcStr +
-                `■ Volume V  : ${sys.V.toFixed(1)} L`;
+    coreSim.species.forEach(s => {
+      if(s.type === 'reactant') s.moles -= s.coeff * net * coreSim.V;
+      if(s.type === 'product') s.moles += s.coeff * net * coreSim.V;
+      if(s.moles < 0) s.moles = 0;
+    });
 
-            // Canvas 그래프 드로잉
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const pX = 45, pY = 40;
-            const gW = canvas.width - pX * 2, gH = canvas.height - pY * 2;
+    let dataPoint = {};
+    coreSim.species.forEach(s => dataPoint[s.name] = s.conc);
+    coreSim.history.push(dataPoint);
+    if(coreSim.history.length > 200) coreSim.history.shift();
 
-            // 모눈 그리드 축
-            ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = 1;
-            for(let i=1; i<=5; i++) {
-                let y = canvas.height - pY - (i / 5.0) * gH;
-                ctx.beginPath(); ctx.moveTo(pX, y); ctx.lineTo(canvas.width - pX, y); ctx.stroke();
-                ctx.fillStyle = '#000'; ctx.font = '11px sans-serif';
-                ctx.fillText((i * 0.8).toFixed(1) + "M", pX - 35, y + 4);
-            }
-            ctx.strokeStyle = '#000000'; ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(pX, pY); ctx.lineTo(pX, canvas.height - pY); ctx.lineTo(canvas.width - pX, canvas.height - pY); ctx.stroke();
+    document.getElementById('data-kc').innerText = targetKc.toFixed(2);
+    document.getElementById('data-q').innerText = currentQ.toFixed(2);
+    document.getElementById('data-temp').innerText = coreSim.T + " °C";
+    document.getElementById('data-vol').innerText = coreSim.V.toFixed(1) + " L";
 
-            if(sys.history.length === 0) return;
-            const maxM = 4.0;
-            function getX(idx) { return pX + (idx / 150) * gW; }
-            function getY(val) { return canvas.height - pY - (val / maxM) * gH; }
+    let statusBox = document.getElementById('data-status');
+    if(Math.abs(currentQ - targetKc) < (targetKc * 0.03 + 0.01)) {
+      statusBox.innerText = "평형 상태 (변화 없음)"; statusBox.style.color = "#171717";
+    } else if (currentQ < targetKc) {
+      statusBox.innerText = "정반응 진행 중 (➡️)"; statusBox.style.color = "#2563eb";
+    } else {
+      statusBox.innerText = "역반응 진행 중 (⬅️)"; statusBox.style.color = "#dc2626";
+    }
+  }
 
-            // 수집 데이터 실시간 드로잉 플롯 루프
-            for(let i=1; i<sys.history.length; i++) {
-                let prev = sys.history[i-1];
-                let curr = sys.history[i];
+  function renderDashboardChart() {
+    const canvas = document.getElementById('chartCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                // 반응물 라인 (파란색 계열 분화)
-                for(let rIdx=0; rIdx<curr.reactants.length; rIdx++) {
-                    ctx.strokeStyle = rIdx === 0 ? '#0000ff' : '#00a6ff'; ctx.lineWidth = 2.5;
-                    ctx.beginPath(); ctx.moveTo(getX(i-1), getY(prev.reactants[rIdx])); ctx.lineTo(getX(i), getY(curr.reactants[rIdx])); ctx.stroke();
-                }
-                // 생성물 라인 (빨간색 계열 분화)
-                for(let pIdx=0; pIdx<curr.products.length; pIdx++) {
-                    ctx.strokeStyle = pIdx === 0 ? '#ff0000' : '#ff7700'; ctx.lineWidth = 2.5;
-                    ctx.beginPath(); ctx.moveTo(getX(i-1), getY(prev.products[pIdx])); ctx.lineTo(getX(i), getY(curr.products[pIdx])); ctx.stroke();
-                }
-                // K 기준 점선
-                ctx.strokeStyle = '#ff8c00'; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
-                ctx.beginPath(); ctx.moveTo(getX(i-1), getY(prev.K)); ctx.lineTo(getX(i), getY(curr.K)); ctx.stroke();
-                ctx.setLineDash([]);
-            }
-        }
+    const pL = 40, pT = 15, pB = 25, pR = 15;
+    const w = canvas.width - pL - pR;
+    const h = canvas.height - pT - pB;
 
-        // 상시 백그라운드 연산동기화 클럭 트리거 설정
-        setInterval(() => {
-            runKineticsEngine();
-            drawInterface();
-        }, 100);
+    const maxM = 6.0;
+    ctx.strokeStyle = '#f5f5f5'; ctx.lineWidth = 1;
+    for(let i=1; i<=6; i++) {
+      let y = canvas.height - pB - (i / maxM) * h;
+      ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(canvas.width - pR, y); stroke();
+      ctx.fillStyle = '#a3a3a3'; ctx.font = '10px monospace';
+      ctx.fillText(i.toFixed(1), pL - 24, y + 3);
+    }
 
-        // 첫 기동 초기 구동 호출
-        parseAndReset();
-    </script>
+    ctx.strokeStyle = '#e5e5e5'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(pL, pT); ctx.lineTo(pL, canvas.height - pB); ctx.lineTo(canvas.width - pR, canvas.height - pB); ctx.stroke();
+
+    if(coreSim.history.length < 2) return;
+
+    const getX = (idx) => pL + (idx / 200) * w;
+    const getY = (val) => canvas.height - pB - (val / maxM) * h;
+
+    coreSim.species.forEach(s => {
+      ctx.strokeStyle = s.color;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(getX(0), getY(coreSim.history[0][s.name]));
+      for(let i=1; i<coreSim.history.length; i++) {
+        ctx.lineTo(getX(i), getY(coreSim.history[i][s.name]));
+      }
+      ctx.stroke();
+    });
+  }
+
+  // 첫 가동 실행 루프
+  loadSelectedPreset();
+  setInterval(() => {
+    calculationLoop();
+    renderDashboardChart();
+  }, 50);
+</script>
 </body>
 </html>
