@@ -3,130 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>화학 평형 실시간 그래프 시뮬레이터 (K/Q 분석)</title>
+    <title>화학평형 시뮬레이터 v1.0 (수행평가 제출용)</title>
     <style>
-        :root {
-            --bg: #f8fafc;
-            --panel: #ffffff;
-            --text: #1e293b;
-            --primary: #3b82f6;
-        }
+        /* 고교/공학용 프로그램 특유의 투박하고 딱딱한 스타일러 */
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background-color: #d4d0c8; /* 윈도우 클래식 회색 */
+            color: #000000;
+            font-family: 'Malgun Gothic', 'Dotum', sans-serif;
+            font-size: 13px;
+            margin: 10px;
         }
-        h1 { margin-bottom: 5px; font-size: 1.8rem; color: #0f172a; }
-        .equation { font-size: 1.1rem; font-weight: bold; color: #64748b; margin-bottom: 20px; }
+        h1 {
+            font-size: 20px;
+            text-align: center;
+            background-color: #000080; /* 네이비 블루 */
+            color: white;
+            padding: 5px;
+            margin: 0 0 10px 0;
+            border: 2px inset #ffffff;
+        }
         
-        .main-container {
+        .main-layout {
             display: flex;
-            gap: 20px;
-            max-width: 1200px;
-            width: 100%;
-            flex-wrap: wrap;
+            gap: 10px;
         }
-        .control-panel {
-            flex: 1;
-            min-width: 320px;
-            background: var(--panel);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+
+        /* 투박한 프레임 테두리 디자인 */
+        .window-box {
+            background-color: #d4d0c8;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff; /* 3D 입체 효과 */
+            padding: 10px;
+            box-sizing: border-box;
         }
-        .graph-panel {
-            flex: 2;
-            min-width: 500px;
-            background: var(--panel);
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+        .window-title {
+            background: linear-gradient(90deg, #0055e5, #9ec2ff);
+            color: white;
+            font-weight: bold;
+            padding: 3px 6px;
+            margin-bottom: 10px;
         }
-        .section-title { font-weight: bold; font-size: 1rem; margin-bottom: 5px; color: #334155; }
-        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        .left-panel { width: 350px; display: flex; flex-direction: column; gap: 10px; }
+        .right-panel { flex: 1; min-width: 500px; }
+
+        .input-group {
+            margin-bottom: 8px;
+            border-bottom: 1px dashed #808080;
+            padding-bottom: 8px;
+        }
+        label { display: inline-block; width: 110px; font-weight: bold; }
+        input[type="text"], input[type="number"] {
+            width: 60px;
+            border: 2px inset #ffffff;
+            background: white;
+            padding: 2px;
+        }
+        input[type="text"].formula-input { width: 180px; }
+
+        /* 고전적인 사각형 버튼 */
         button {
-            padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px;
-            background: #fff; font-weight: 600; cursor: pointer; transition: all 0.2s;
+            background-color: #d4d0c8;
+            border: 2px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            font-size: 12px;
+            padding: 5px 8px;
+            cursor: pointer;
+            font-weight: bold;
         }
-        button:hover { background: #f1f5f9; border-color: #94a3b8; }
-        
-        /* 대시보드 */
-        .dashboard {
-            background: #f1f5f9; padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary);
+        button:active {
+            border-color: #808080 #ffffff #ffffff #808080;
+            padding: 6px 7px 4px 9px;
         }
-        .dash-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 0.95rem; }
-        .status-badge {
-            font-weight: bold; text-align: center; margin-top: 10px; padding: 5px; border-radius: 4px;
+        .btn-block { width: 100%; margin-top: 4px; text-align: left; }
+
+        /* 상태 창 */
+        .status-screen {
+            background-color: #000000;
+            color: #00ff00; /* 터미널 초록색 */
+            font-family: Courier, monospace;
+            padding: 8px;
+            border: 2px inset #ffffff;
+            margin-top: 5px;
+            font-size: 12px;
+            line-height: 1.4;
         }
+
         canvas {
-            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; width: 100%; max-width: 700px;
+            background-color: #ffffff;
+            border: 2px inset #ffffff;
+            display: block;
+            width: 100%;
         }
-        .legend { display: flex; gap: 15px; margin-top: 10px; font-size: 0.9rem; font-weight: bold; }
-        .legend-item { display: flex; align-items: center; gap: 5px; }
     </style>
 </head>
 <body>
 
-    <h1>화학 평형 실시간 농도 그래프 시뮬레이터</h1>
-    <div class="equation">N₂O₄ (무색) ⇄ 2NO₂ (적갈색) + 열 (발열반응)</div>
+    <h1>화학 평형 상태 및 농도 변화 시뮬레이션 시스템 (Ver 1.0.2)</h1>
 
-    <div class="main-container">
-        <div class="control-panel">
-            <div class="dashboard">
-                <div class="section-title" style="margin-bottom: 10px;">📊 실시간 정량 데이터</div>
-                <div class="dash-row"><span>평형 상수 (K):</span> <span id="txt-k" style="font-weight: bold;">0.50</span></div>
-                <div class="dash-row"><span>반응 지수 (Q):</span> <span id="txt-q" style="font-weight: bold; color: #ef4444;">0.50</span></div>
-                <div class="dash-row"><span>[N₂O₄] 농도:</span> <span id="txt-n2o4">1.00 M</span></div>
-                <div class="dash-row"><span>[NO₂] 농도:</span> <span id="txt-no2">0.71 M</span></div>
-                <div class="dash-row"><span>현재 부피(V):</span> <span id="txt-v">1.0 L</span></div>
-                <div id="txt-status" class="status-badge" style="background: #dcfce7; color: #166534;">Q = K (평형 상태)</div>
+    <div class="main-layout">
+        <div class="left-panel">
+            <div class="window-box">
+                <div class="window-title">1. 반응식 설정 및 초기화</div>
+                <div class="input-group">
+                    <label>가상 화학식:</label>
+                    <input type="number" id="coeff-A" value="1" min="1" max="3"> <strong>A</strong> + 
+                    <input type="number" id="coeff-B" value="1" min="0" max="3"> <strong>B</strong> ⇄ 
+                    <input type="number" id="coeff-C" value="2" min="1" max="4"> <strong>C</strong>
+                </div>
+                <div class="input-group">
+                    <label>초기 평형수(K):</label>
+                    <input type="number" id="input-k" value="0.50" step="0.05" style="width:50px;">
+                </div>
+                <button onclick="applyFormulaAndReset()" style="width: 100%; background-color: #b5b0a8;">반응식 적용 및 초기화</button>
             </div>
 
-            <div>
-                <div class="section-title">1. 농도 변화 (물질 주입)</div>
-                <div class="btn-grid">
-                    <button onclick="perturb('add_N2O4')">N₂O₄ 급격히 추가</button>
-                    <button onclick="perturb('add_NO2')">NO₂ 급격히 추가</button>
+            <div class="window-box">
+                <div class="window-title">2. 르샤틀리에 조건 변화 조작</div>
+                
+                <div style="margin-bottom: 10px;">
+                    <strong>[농도 변동]</strong><br>
+                    <button class="btn-block" onclick="triggerPerturb('add_A')">▶ 물질 A 급격히 추가 (+0.5M)</button>
+                    <button class="btn-block" onclick="triggerPerturb('add_C')">▶ 물질 C 급격히 추가 (+0.5M)</button>
+                </div>
+
+                <div style="margin-bottom: 10px;">
+                    <strong>[부피(압력) 변동]</strong><br>
+                    <button class="btn-block" onclick="triggerPerturb('dec_V')">▶ 용기 부피 압축 (V → 0.5L) [압력↑]</button>
+                    <button class="btn-block" onclick="triggerPerturb('inc_V')">▶ 용기 부피 팽창 (V → 2.0L) [압력↓]</button>
+                </div>
+
+                <div>
+                    <strong>[계의 온도 변동]</strong><br>
+                    <button class="btn-block" onclick="triggerPerturb('inc_T')">▶ 계 가열 (평형상수 K 감소 처리)</button>
+                    <button class="btn-block" onclick="triggerPerturb('dec_T')">▶ 계 냉각 (평형상수 K 증가 처리)</button>
                 </div>
             </div>
 
-            <div>
-                <div class="section-title">2. 압력 변화 (부피 조절)</div>
-                <div class="btn-grid">
-                    <button onclick="perturb('dec_V')">부피 반감 (압력↑)</button>
-                    <button onclick="perturb('inc_V')">부피 2倍 (압력↓)</button>
+            <div class="window-box">
+                <div class="window-title">3. 계의 상태 연산 결과 출력</div>
+                <div class="status-screen" id="monitor">
+                    SYSTEM READY...
                 </div>
             </div>
-
-            <div>
-                <div class="section-title">3. 온도 변화 (K값 변동)</div>
-                <div class="btn-grid">
-                    <button onclick="perturb('inc_T')">온도 상승 (K 감소)</button>
-                    <button onclick="perturb('dec_T')">온도 하강 (K 증가)</button>
-                </div>
-            </div>
-            
-            <button onclick="resetSimulation()" style="background: #ef4444; color: white; border: none; margin-top: 10px;">전체 초기화</button>
         </div>
 
-        <div class="graph-panel">
-            <div class="section-title" style="align-self: flex-start; margin-bottom: 10px;">📈 시간에 따른 농도 그래프 (M)</div>
-            <canvas id="graphCanvas" width="700" height="400"></canvas>
-            <div class="legend">
-                <div class="legend-item"><span style="width:12px; height:3px; background:#3b82f6; display:inline-block;"></span> [N₂O₄] (반응물)</div>
-                <div class="legend-item"><span style="width:12px; height:3px; background:#ef4444; display:inline-block;"></span> [NO₂] (생성물)</div>
-                <div class="legend-item"><span style="width:12px; height:3px; background:#eab308; display:inline-block; border-dash: 2px;"></span> 평형 상수 K</div>
+        <div class="right-panel window-box">
+            <div class="window-title">📊 실시간 평형 농도 변화 그래프 (Time-Concentration Graph)</div>
+            <canvas id="graphCanvas" width="750" height="430"></canvas>
+            <div style="margin-top:8px; font-weight:bold; font-size:12px;">
+                범례: 
+                <span style="color:blue;">■ [A]</span> &nbsp;&nbsp; 
+                <span style="color:cyan;">■ [B]</span> &nbsp;&nbsp; 
+                <span style="color:red;">■ [C]</span> &nbsp;&nbsp; 
+                <span style="color:orange;">--- 평형상수(K) 기준선</span>
             </div>
         </div>
     </div>
@@ -135,174 +165,97 @@
         const canvas = document.getElementById('graphCanvas');
         const ctx = canvas.getContext('2d');
 
-        // 화학 계의 상태 변수 (초기 평형 상태 세팅)
-        let sim = {
-            N2O4: 1.0,  // 몰수 (mol)
-            NO2: 0.7071,// 몰수 (mol)
-            V: 1.0,     // 부피 (L)
-            K: 0.50,    // 평형 상수 (온도에 의해서만 변함)
-            history: [],// 그래프를 그리기 위한 데이터 저장소
+        // 내부 물리량 제어 데이터 구조
+        let model = {
+            nA: 1.0, nB: 1.0, nC: 0.7071, // 각 기체의 몰수(mol)
+            cA: 1.0, cB: 1.0, cC: 0.7071, // 각 기체의 몰농도(M)
+            V: 1.0,
+            K: 0.50,
+            Q: 0.50,
+            // 사용자가 입력할 반응 계수
+            a: 1, b: 1, c: 2,
+            history: [],
             time: 0
         };
 
-        // 반응 속도 상수 (자연스러운 평형 복귀 곡선을 유도하기 위함)
-        const k_forward = 0.1; 
+        const k_f_const = 0.08; // 반응 속도 기본 인자
 
-        function initHistory() {
-            sim.history = [];
-            sim.time = 0;
-            // 초기 50스텝 동안 평형 상태 안정적으로 그리기
-            for(let i=0; i<60; i++) {
-                recordState();
-                sim.time++;
+        // 사용자가 입력한 화학식 계수와 K값을 읽어서 시스템 재시작
+        function applyFormulaAndReset() {
+            model.a = parseInt(document.getElementById('coeff-A').value) || 1;
+            model.b = parseInt(document.getElementById('coeff-B').value) || 0; // 0이면 반응 안함
+            model.c = parseInt(document.getElementById('coeff-C').value) || 1;
+            model.K = parseFloat(document.getElementById('input-k').value) || 0.5;
+
+            // 계수에 맞춰 대략 평형 근처가 되도록 야매(?) 초기 몰수 자동 매칭
+            model.V = 1.0;
+            model.nA = 1.2;
+            model.nB = model.b > 0 ? 1.2 : 0;
+            // Q = [C]^c / ([A]^a * [B]^b) = K 가 되도록 
+            let bottom = Math.pow(1.2, model.a) * Math.pow(model.b > 0 ? 1.2 : 1, model.b);
+            model.nC = Math.pow(model.K * bottom, 1 / model.c);
+
+            model.history = [];
+            model.time = 0;
+
+            // 초기 안정 기류 그래프 50스텝 생성
+            for(let i=0; i<50; i++) {
+                calculateKinetics();
             }
         }
 
-        function recordState() {
-            let c_N2O4 = sim.N2O4 / sim.V;
-            let c_NO2 = sim.NO2 / sim.V;
-            let Q = (c_NO2 ** 2) / c_N2O4;
-            
-            sim.history.push({
-                time: sim.time,
-                c_N2O4: c_N2O4,
-                c_NO2: c_NO2,
-                K: sim.K,
-                Q: Q
-            });
-            
-            if(sim.history.length > 130) {
-                sim.history.shift(); // 화면 밖으로 나간 데이터는 삭제 (우측으로 흘러가는 연출)
-            }
-        }
-
-        // 미분방정식을 이용한 화학 평형 이동 연산 루프
-        function updateKinetics() {
-            let c_N2O4 = sim.N2O4 / sim.V;
-            let c_NO2 = sim.NO2 / sim.V;
-            let Q = (c_NO2 ** 2) / c_N2O4;
-
-            // 역반응 속도 상수는 K = k_f / k_b 관계에 의해 자동 결정
-            let k_backward = k_forward / sim.K;
-
-            // 속도 법칙 계산
-            let r_f = k_forward * c_N2O4;
-            let r_b = k_backward * (c_NO2 ** 2);
-            let net_rate = r_f - r_b; // 정반응 속도 - 역반응 속도
-
-            // 농도 미세 변화량 적용 (dt = 0.1 역할)
-            sim.N2O4 -= net_rate * 0.2 * sim.V;
-            sim.NO2 += 2 * net_rate * 0.2 * sim.V;
-
-            sim.time++;
-            recordState();
-            updateUI(Q, c_N2O4, c_NO2);
-            drawGraph();
-        }
-
-        // 실시간 조작 발생 함수 (르샤틀리에 원리 트리거)
-        function perturb(type) {
-            if (type === 'add_N2O4') {
-                sim.N2O4 += 0.8; // 반응물 주입 -> 순간 분모 커짐 -> Q < K (정반응 우세)
-            } else if (type === 'add_NO2') {
-                sim.NO2 += 0.8;  // 생성물 주입 -> 순간 분자 커짐 -> Q > K (역반응 우세)
+        // 르샤틀리에 트리거 이벤트 처리 함수
+        function triggerPerturb(type) {
+            if (type === 'add_A') {
+                model.nA += 0.5;
+            } else if (type === 'add_C') {
+                model.nC += 0.5;
             } else if (type === 'dec_V') {
-                sim.V /= 2;      // 부피 반감 -> 순간 농도 2배 -> 분자가 제곱이므로 Q > K (역반응 우세)
+                model.V = 0.5;
             } else if (type === 'inc_V') {
-                sim.V *= 2;      // 부피 2배 -> 순간 농도 0.5배 -> 분자가 제곱이므로 Q < K (정반응 우세)
+                model.V = 2.0;
             } else if (type === 'inc_T') {
-                sim.K = 0.15;    // 발열반응이므로 온도 높이면 K 감소 -> 순간 Q > K (역반응 우세)
+                model.K = parseFloat((model.K * 0.4).toFixed(3)); // 온도 상승시 K 감소 예시
             } else if (type === 'dec_T') {
-                sim.K = 1.20;    // 온도 낮추면 K 증가 -> 순간 Q < K (정반응 우세)
+                model.K = parseFloat((model.K * 2.2).toFixed(3)); // 온도 하강시 K 증가 예시
             }
         }
 
-        function updateUI(Q, c_N2O4, c_NO2) {
-            document.getElementById('txt-k').innerText = sim.K.toFixed(2);
-            document.getElementById('txt-q').innerText = Q.toFixed(2);
-            document.getElementById('txt-n2o4').innerText = c_N2O4.toFixed(2) + " M";
-            document.getElementById('txt-no2').innerText = c_O2 = c_NO2.toFixed(2) + " M";
-            document.getElementById('txt-v').innerText = sim.V.toFixed(1) + " L";
+        // 미분방정식 근사 기반 동적 농도 연산 루프
+        function calculateKinetics() {
+            // 1. 현재 농도 계산 (C = n/V)
+            model.cA = model.nA / model.V;
+            model.cB = model.b > 0 ? (model.nB / model.V) : 0;
+            model.cC = model.nC / model.V;
 
-            let statusBox = document.getElementById('txt-status');
-            if (Math.abs(Q - sim.K) < 0.03) {
-                statusBox.innerText = "Q ≒ K (평형 상태)";
-                statusBox.style.background = "#dcfce7"; statusBox.style.color = "#166534";
-            } else if (Q < sim.K) {
-                statusBox.innerText = "Q < K (정반응 진행 우세)";
-                statusBox.style.background = "#dbeafe"; statusBox.style.color = "#1e40af";
-            } else {
-                statusBox.innerText = "Q > K (역반응 진행 우세)";
-                statusBox.style.background = "#ffedd5"; statusBox.style.color = "#9a3412";
-            }
-        }
+            // 2. 반응지수 Q 계산
+            let denominator = Math.pow(model.cA, model.a) * (model.b > 0 ? Math.pow(model.cB, model.b) : 1);
+            if (denominator === 0) denominator = 0.0001;
+            model.Q = Math.pow(model.cC, model.c) / denominator;
 
-        // HTML5 Canvas 그래프 드로잉 함수
-        function drawGraph() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // 3. 정반응 및 역반응 속도 연산 (기하급수 폭발 방지 캡핑)
+            let r_f = k_f_const * Math.pow(model.cA, model.a) * (model.b > 0 ? Math.pow(model.cB, model.b) : 1);
+            let k_b_const = k_f_const / model.K;
+            let r_b = k_b_const * Math.pow(model.cC, model.c);
             
-            const padding = 50;
-            const gWidth = canvas.width - padding * 2;
-            const gHeight = canvas.height - padding * 2;
+            let net_rate = (r_f - r_b) * 0.1; // dt = 0.1 역할
+            
+            // 농도 변화가 너무 과도하게 튀지 않도록 보정값 제한
+            if(net_rate > 0.1) net_rate = 0.1;
+            if(net_rate < -0.1) net_rate = -0.1;
 
-            // 축 그리기
-            ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.moveTo(padding, padding);
-            ctx.lineTo(padding, canvas.height - padding);
-            ctx.lineTo(canvas.width - padding, canvas.height - padding);
-            ctx.stroke();
+            // 4. 화학 양론 계수(a, b, c)비율대로 몰수 변동 적용
+            model.nA -= model.a * net_rate * model.V;
+            if(model.b > 0) model.nB -= model.b * net_rate * model.V;
+            model.nC += model.c * net_rate * model.V;
 
-            if (sim.history.length === 0) return;
+            // 몰수 음수 방지 가드코드
+            if(model.nA < 0) model.nA = 0;
+            if(model.nB < 0) model.nB = 0;
+            if(model.nC < 0) model.nC = 0;
 
-            // 데이터의 y값 매핑을 위한 스케일 계산 (최대 농도 4.5M 기준)
-            const maxVal = 4.5;
-            function getX(index) { return padding + (index / 130) * gWidth; }
-            function getY(value) { return canvas.height - padding - (value / maxVal) * gHeight; }
+            model.time++;
 
-            // 가이드 눈금선 (1M, 2M, 3M, 4M)
-            ctx.strokeStyle = '#f1f5f9'; ctx.lineWidth = 1;
-            ctx.fillStyle = '#94a3b8'; ctx.font = '11px sans-serif';
-            for(let i=1; i<=4; i++) {
-                let y = getY(i);
-                ctx.beginPath(); ctx.moveTo(padding, y); ctx.lineTo(canvas.width - padding, y); ctx.stroke();
-                ctx.fillText(i + " M", padding - 35, y + 4);
-            }
-
-            // 실시간 데이터 라인 그리기
-            ctx.lineWidth = 3;
-
-            // 1. [N2O4] 곡선 (Blue)
-            ctx.strokeStyle = '#3b82f6';
-            ctx.beginPath();
-            ctx.moveTo(getX(0), getY(sim.history[0].c_N2O4));
-            for(let i=1; i<sim.history.length; i++) { ctx.lineTo(getX(i), getY(sim.history[i].c_N2O4)); }
-            ctx.stroke();
-
-            // 2. [NO2] 곡선 (Red)
-            ctx.strokeStyle = '#ef4444';
-            ctx.beginPath();
-            ctx.moveTo(getX(0), getY(sim.history[0].c_NO2));
-            for(let i=1; i<sim.history.length; i++) { ctx.lineTo(getX(i), getY(sim.history[i].c_NO2)); }
-            ctx.stroke();
-
-            // 3. K 평형 상수선 (Yellow 점선)
-            ctx.strokeStyle = '#eab308'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
-            ctx.beginPath();
-            ctx.moveTo(getX(0), getY(sim.history[0].K));
-            for(let i=1; i<sim.history.length; i++) { ctx.lineTo(getX(i), getY(sim.history[i].K)); }
-            ctx.stroke();
-            ctx.setLineDash([]); // 점선 해제
-        }
-
-        function resetSimulation() {
-            sim.N2O4 = 1.0; sim.NO2 = 0.7071; sim.V = 1.0; sim.K = 0.50;
-            initHistory();
-        }
-
-        // 상시 실행 루프 설정 (0.1초마다 화학적 연산 수행 및 그래프 이동)
-        initHistory();
-        setInterval(updateKinetics, 100);
-    </script>
-</body>
-</html>
+            // 히스토리 배열에 데이터 축적
+            model.history.push({
+                cA: model.cA,
