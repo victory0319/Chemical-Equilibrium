@@ -323,7 +323,7 @@
     ctx.strokeStyle = '#f5f5f5'; ctx.lineWidth = 1;
     for(let i=1; i<=6; i++) {
       let y = canvas.height - pB - (i / maxM) * h;
-      ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(canvas.width - pR, y); stroke();
+      ctx.beginPath(); ctx.moveTo(pL, y); ctx.lineTo(canvas.width - pR, y); ctx.stroke();
       ctx.fillStyle = '#a3a3a3'; ctx.font = '10px monospace';
       ctx.fillText(i.toFixed(1), pL - 24, y + 3);
     }
