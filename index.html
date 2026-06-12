@@ -276,10 +276,10 @@
 
     let currentQ = rPart === 0 ? 9999 : pPart / rPart;
 
-    let k = 0.08;
+    let k = 0.3;
     let v_f = k * rPart;
     let v_b = (k / targetKc) * pPart;
-    let net = (v_f - v_b) * 0.06;
+    let net = (v_f - v_b) * 0.15;
 
     if(net > 0.05) net = 0.05;
     if(net < -0.05) net = -0.05;
